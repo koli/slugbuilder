@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+GET_PATH=/tmp/slug.tgz
+# shellcheck disable=SC1091
+source /bin/normalize_storage
+objstorage --storage-type="$BUILDER_STORAGE" download "$TAR_PATH" "$GET_PATH"
