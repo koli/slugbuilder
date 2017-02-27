@@ -25,10 +25,12 @@ mkdir -p $secret_dir
 mkdir -p $buildpack_root
 mkdir -p $build_root/.profile.d
 
-if ! [[ -z "${TAR_PATH}" ]]; then
-	get_object
-	tar -xzf /tmp/slug.tgz -C /app/
-	unset TAR_PATH
+if ! [[ -z "${GITREMOTE}" ]]; then
+    # Expect credentials of the git server in the remote URL
+    git clone --quiet "$GITREMOTE" /app
+    pushd /app &>/dev/null
+        git checkout --quiet "$GITREVISION"
+    popd &>/dev/null
 fi
 
 if [[ "$1" == "-" ]]; then
@@ -252,6 +254,6 @@ if [[ "$slug_file" != "-" ]]; then
     echo_title "Compiled slug size is $slug_size"
 
     if [[ $PUT_PATH ]]; then
-			put_object
+        put_object
     fi
 fi
