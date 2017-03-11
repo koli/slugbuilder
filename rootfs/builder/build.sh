@@ -25,11 +25,11 @@ mkdir -p $secret_dir
 mkdir -p $buildpack_root
 mkdir -p $build_root/.profile.d
 
-if ! [[ -z "${GITREMOTE}" ]]; then
+if ! [[ -z "${GIT_CLONE_URL}" ]]; then
     # Expect credentials of the git server in the remote URL
-    git clone --quiet "$GITREMOTE" /app
+    git clone --quiet "$GIT_CLONE_URL" /app
     pushd /app &>/dev/null
-        git checkout --quiet "$GITREVISION"
+        git checkout --quiet "$GIT_REVISION"
     popd &>/dev/null
 fi
 
@@ -254,6 +254,11 @@ if [[ "$slug_file" != "-" ]]; then
     echo_title "Compiled slug size is $slug_size"
 
     if [[ $PUT_PATH ]]; then
-        put_object
+        put_object 
     fi
+	if [[ $GIT_RELEASE_URL ]]; then
+		curl $GIT_RELEASE_URL --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
+	fi
+	# clean up
+	rm -f $slug_file
 fi
