@@ -31,6 +31,7 @@ if ! [[ -z "${GIT_CLONE_URL}" ]]; then
     pushd /app &>/dev/null
 	    git fetch origin "+$GIT_BRANCH"
 		git checkout -qf FETCH_HEAD
+		GIT_COMMIT_ID=$(git rev-parse --verify HEAD)
     popd &>/dev/null
 fi
 
@@ -258,7 +259,7 @@ if [[ "$slug_file" != "-" ]]; then
         put_object 
     fi
 	if [[ $GIT_RELEASE_URL ]]; then
-		curl --progress-bar $GIT_RELEASE_URL --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
+		curl --progress-bar "$GIT_RELEASE_URL/$GIT_COMMIT_ID" --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
 	fi
 	# clean up
 	rm -f $slug_file
