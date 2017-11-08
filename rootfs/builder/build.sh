@@ -27,9 +27,10 @@ mkdir -p $build_root/.profile.d
 
 if ! [[ -z "${GIT_CLONE_URL}" ]]; then
     # Expect credentials of the git server in the remote URL
-    git clone --quiet "$GIT_CLONE_URL" /app
+    git clone --depth=50 "$GIT_CLONE_URL" /app
     pushd /app &>/dev/null
-        git checkout --quiet "$GIT_REVISION"
+	    git fetch origin "+$GIT_BRANCH"
+		git checkout -qf FETCH_HEAD
     popd &>/dev/null
 fi
 
@@ -257,8 +258,9 @@ if [[ "$slug_file" != "-" ]]; then
         put_object 
     fi
 	if [[ $GIT_RELEASE_URL ]]; then
-		curl $GIT_RELEASE_URL --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
+		curl --progress-bar $GIT_RELEASE_URL --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
 	fi
 	# clean up
 	rm -f $slug_file
+	echo_normal "Done."
 fi
