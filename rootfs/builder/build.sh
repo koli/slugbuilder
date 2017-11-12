@@ -261,9 +261,13 @@ if [[ "$slug_file" != "-" ]]; then
         put_object 
     fi
 	if [[ $GIT_RELEASE_URL ]]; then
+		echo_normal "Uploading release"
 		curl --progress-bar "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
 		curl --progress-bar "$GIT_RELEASE_URL" --user ":${AUTH_TOKEN}" -XPOST -H 'Content-Type: application/json' \
-			-d '{"lang": "'$buildpack_name'", "kubeRef": "'$POD_NAME'",  "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'"}}'
+			-d '{"lang": "'$buildpack_name'", "kubeRef": "'$POD_NAME'", "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'"}}'
+		if [[ $DEBUG ]]; then
+			echo '{"lang": "'$buildpack_name'", "kubeRef": "'$POD_NAME'", "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'"}}' |jq .
+		fi
 	fi
 	# clean up
 	rm -f $slug_file
