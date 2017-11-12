@@ -31,6 +31,9 @@ if ! [[ -z "${GIT_CLONE_URL}" ]]; then
     pushd /app &>/dev/null
 	    git fetch origin "+$GIT_BRANCH"
 		git checkout -qf FETCH_HEAD
+		COMMIT=$(git rev-parse HEAD)
+		COMMIT_MSG=$(git log -1 --pretty=%B |head -n1)
+		COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
     popd &>/dev/null
 fi
 
@@ -258,7 +261,9 @@ if [[ "$slug_file" != "-" ]]; then
         put_object 
     fi
 	if [[ $GIT_RELEASE_URL ]]; then
-		curl --progress-bar $GIT_RELEASE_URL --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
+		curl --progress-bar "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
+		curl --progress-bar "$GIT_RELEASE_URL" --user ":${AUTH_TOKEN}" -XPOST -H 'Content-Type: application/json'
+			-d '{"lang": "'$buildpack_name'", "kubeRef": "'$POD_NAME'",  "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'"}}'
 	fi
 	# clean up
 	rm -f $slug_file
