@@ -26,6 +26,7 @@ mkdir -p $buildpack_root
 mkdir -p $build_root/.profile.d
 
 if ! [[ -z "${GIT_CLONE_URL}" ]]; then
+    echo_normal "Cloning $GIT_BRANCH"
     # Expect credentials of the git server in the remote URL
     git clone --depth=50 "$GIT_CLONE_URL" /app
     pushd /app &>/dev/null
@@ -35,6 +36,11 @@ if ! [[ -z "${GIT_CLONE_URL}" ]]; then
 		COMMIT_MSG=$(git log -1 --pretty=%B |head -n1)
 		COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
     popd &>/dev/null
+fi
+
+if [[ $GIT_RELEASE_URL ]]; then
+    payload='{"kubeRef": "'$POD_NAME'", "source": "'$GIT_SOURCE'", "gitBranch": "'$GIT_BRANCH'", "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'", "avatar-url": "'$GIT_AUTHOR_AVATAR'", "compare": "'$GIT_COMPARE'"}}'
+    curl -f -s "$GIT_RELEASE_URL" --user ":${AUTH_TOKEN}" -XPOST -H 'Content-Type: application/json' -d "$payload" >/dev/null
 fi
 
 if [[ "$1" == "-" ]]; then
@@ -263,10 +269,10 @@ if [[ "$slug_file" != "-" ]]; then
     fi
 	if [[ $GIT_RELEASE_URL ]]; then
 		echo_normal "Uploading release"
-		curl -s "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
+		curl -f -s "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
 		curl -s "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -F "file=@${build_file}"
-		payload='{"lang": "'$buildpack_name'", "kubeRef": "'$POD_NAME'", "source": "'$GIT_SOURCE'", "gitBranch": "'$GIT_BRANCH'", "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'"}}'
-		curl -s "$GIT_RELEASE_URL" --user ":${AUTH_TOKEN}" -XPOST -H 'Content-Type: application/json' -d "$payload" >/dev/null 
+		payload='{"lang": "'$buildpack_name'"}'
+		curl -f -s "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -XPUT -H 'Content-Type: application/json' -d "$payload" >/dev/null
 	fi
 	# clean up
 	rm -f $slug_file
