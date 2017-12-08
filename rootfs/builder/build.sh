@@ -49,7 +49,6 @@ function echo_normal() {
 }
 
 if ! [[ -z "${GIT_CLONE_URL}" ]]; then
-    echo_normal "Cloning $GIT_BRANCH"
     # Expect credentials of the git server in the remote URL
     git clone --depth=50 "$GIT_CLONE_URL" /app
     pushd /app &>/dev/null
@@ -62,7 +61,7 @@ if ! [[ -z "${GIT_CLONE_URL}" ]]; then
 fi
 
 if [[ $GIT_RELEASE_URL ]]; then
-    payload='{"kubeRef": "'$POD_NAME'", "source": "'$GIT_SOURCE'", "gitBranch": "'$GIT_BRANCH'", "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'", "avatar-url": "'$GIT_AUTHOR_AVATAR'", "compare": "'$GIT_COMPARE'"}}'
+    payload='{"kubeRef": "'$POD_NAME'", "source": "'$GIT_SOURCE'", "gitBranch": "'$GIT_BRANCH'", "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'", "avatar-url": "'$GIT_AUTHOR_AVATAR'", "compare": "'$GIT_COMPARE'", "url": "'$GIT_COMMIT_URL'"}}'
     curl -f -s "$GIT_RELEASE_URL" --user ":${AUTH_TOKEN}" -XPOST -H 'Content-Type: application/json' -d "$payload" >/dev/null
 fi
 
