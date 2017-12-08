@@ -25,24 +25,6 @@ mkdir -p $secret_dir
 mkdir -p $buildpack_root
 mkdir -p $build_root/.profile.d
 
-if ! [[ -z "${GIT_CLONE_URL}" ]]; then
-    echo_normal "Cloning $GIT_BRANCH"
-    # Expect credentials of the git server in the remote URL
-    git clone --depth=50 "$GIT_CLONE_URL" /app
-    pushd /app &>/dev/null
-	    git fetch origin "+$GIT_BRANCH"
-		git checkout -qf FETCH_HEAD
-		COMMIT=$(git rev-parse HEAD)
-		COMMIT_MSG=$(git log -1 --pretty=%B |head -n1)
-		COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
-    popd &>/dev/null
-fi
-
-if [[ $GIT_RELEASE_URL ]]; then
-    payload='{"kubeRef": "'$POD_NAME'", "source": "'$GIT_SOURCE'", "gitBranch": "'$GIT_BRANCH'", "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'", "avatar-url": "'$GIT_AUTHOR_AVATAR'", "compare": "'$GIT_COMPARE'"}}'
-    curl -f -s "$GIT_RELEASE_URL" --user ":${AUTH_TOKEN}" -XPOST -H 'Content-Type: application/json' -d "$payload" >/dev/null
-fi
-
 if [[ "$1" == "-" ]]; then
     slug_file="$1"
 else
@@ -65,6 +47,24 @@ function echo_title() {
 function echo_normal() {
     echo $'\e[1G      ' "$*" | output_redirect
 }
+
+if ! [[ -z "${GIT_CLONE_URL}" ]]; then
+    echo_normal "Cloning $GIT_BRANCH"
+    # Expect credentials of the git server in the remote URL
+    git clone --depth=50 "$GIT_CLONE_URL" /app
+    pushd /app &>/dev/null
+	    git fetch origin "+$GIT_BRANCH"
+		git checkout -qf FETCH_HEAD
+		COMMIT=$(git rev-parse HEAD)
+		COMMIT_MSG=$(git log -1 --pretty=%B |head -n1)
+		COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+    popd &>/dev/null
+fi
+
+if [[ $GIT_RELEASE_URL ]]; then
+    payload='{"kubeRef": "'$POD_NAME'", "source": "'$GIT_SOURCE'", "gitBranch": "'$GIT_BRANCH'", "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'", "avatar-url": "'$GIT_AUTHOR_AVATAR'", "compare": "'$GIT_COMPARE'"}}'
+    curl -f -s "$GIT_RELEASE_URL" --user ":${AUTH_TOKEN}" -XPOST -H 'Content-Type: application/json' -d "$payload" >/dev/null
+fi
 
 function ensure_indent() {
     while read -r line; do
