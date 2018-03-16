@@ -14,4 +14,4 @@ USER slug
 ENV HOME /app
 RUN /builder/install-buildpacks
 
-ENTRYPOINT ["/bin/sh", "-c", "/builder/start.sh"]
+ENTRYPOINT ["/bin/sh", "-c", "/builder/build.sh"]
