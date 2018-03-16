@@ -29,6 +29,10 @@ def echo_normal(msg):
     set_logging_normal()
     logging.info(msg)
 
+def echo_debug(msg):
+    set_logging_normal()
+    logging.debug(msg)
+
 def echo_title(msg):
     set_logging_title()
     logging.info(msg)
