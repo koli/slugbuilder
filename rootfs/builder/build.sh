@@ -3,6 +3,7 @@ set -eo pipefail
 
 function sleep_before_exit {
 	# delay before exiting, so stdout/stderr flushes through the logging system
+    echo "EXIT CODE $?"
 	sleep 3
 }
 trap sleep_before_exit EXIT
