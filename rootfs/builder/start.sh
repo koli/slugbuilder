@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-/builder/build.sh | tee /tmp/build.log
+/bin/sh -c '/builder/build.sh | tee /tmp/build.log'
