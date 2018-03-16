@@ -54,9 +54,9 @@ if ! [[ -z "${GIT_CLONE_URL}" ]]; then
     pushd /app &>/dev/null
 	    git fetch origin "+$GIT_BRANCH"
 		git checkout -qf FETCH_HEAD
-		COMMIT=$(git rev-parse HEAD)
-		COMMIT_MSG=$(git log -1 --pretty=%B |head -n1)
-		COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+		export COMMIT=$(git rev-parse HEAD)
+		export COMMIT_MSG=$(git log -1 --pretty=%B |head -n1)
+		export COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
     popd &>/dev/null
 fi
 

@@ -100,5 +100,6 @@ if __name__ == '__main__':
         if not update_release_metadata(args.git_api_url, payload):
             sys.exit(1)
     elif args.action == 'create':
+        echo_title('Creating new release ...')
         if not create_release(args.git_api_url, env_payload()):
             sys.exit(1)
