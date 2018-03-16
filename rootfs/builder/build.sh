@@ -41,11 +41,11 @@ function output_redirect() {
 }
 
 function echo_title() {
-    echo $'\e[1G----->' "$*" | output_redirect
+    echo $'----->' "$*" | output_redirect
 }
 
 function echo_normal() {
-    echo $'\e[1G      ' "$*" | output_redirect
+    echo $'      ' "$*" | output_redirect
 }
 
 if ! [[ -z "${GIT_CLONE_URL}" ]]; then
@@ -61,8 +61,9 @@ if ! [[ -z "${GIT_CLONE_URL}" ]]; then
 fi
 
 if [[ $GIT_RELEASE_URL ]]; then
-    payload='{"kubeRef": "'$POD_NAME'", "source": "'$GIT_SOURCE'", "gitBranch": "'$GIT_BRANCH'", "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'", "avatar-url": "'$GIT_AUTHOR_AVATAR'", "compare": "'$GIT_COMPARE'", "url": "'$GIT_COMMIT_URL'"}}'
-    curl -f -s "$GIT_RELEASE_URL" --user ":${AUTH_TOKEN}" -XPOST -H 'Content-Type: application/json' -d "$payload" >/dev/null
+    /bin/metadata.py --action create --git-api-url $GIT_RELEASE_URL
+    # payload='{"kubeRef": "'$POD_NAME'", "source": "'$GIT_SOURCE'", "gitBranch": "'$GIT_BRANCH'", "headCommit": {"id": "'$COMMIT'", "author": "'$COMMIT_AUTHOR'", "message": "'$COMMIT_MSG'", "avatar-url": "'$GIT_AUTHOR_AVATAR'", "compare": "'$GIT_COMPARE'", "url": "'$GIT_COMMIT_URL'"}}'
+    # curl -f -s "$GIT_RELEASE_URL" --user ":${AUTH_TOKEN}" -XPOST -H 'Content-Type: application/json' -d "$payload" >/dev/null
 fi
 
 function ensure_indent() {
@@ -267,11 +268,15 @@ if [[ "$slug_file" != "-" ]]; then
         put_object 
     fi
 	if [[ $GIT_RELEASE_URL ]]; then
-		echo_normal "Uploading release"
-		curl -f -s "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
-		curl -s "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -F "file=@${build_file}"
-		payload='{"lang": "'$buildpack_name'"}'
-		curl -f -s "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -XPUT -H 'Content-Type: application/json' -d "$payload" >/dev/null
+        /bin/upload_files.py --git-api-url $GIT_RELEASE_URL/$COMMIT --file $slug_file
+        /bin/upload_files.py --git-api-url $GIT_RELEASE_URL/$COMMIT --file $build_file
+        /bin/metadata.py --action update --git-api-url $GIT_RELEASE_URL/$COMMIT \
+            --field "lang=$buildpack_name"
+		# echo_normal "Uploading release"
+		# curl -f -s "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -F "file=@${slug_file}"
+		# curl -s "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -F "file=@${build_file}"
+		# payload='{"lang": "'$buildpack_name'"}'
+		# curl -f -s "$GIT_RELEASE_URL/$COMMIT" --user ":${AUTH_TOKEN}" -XPUT -H 'Content-Type: application/json' -d "$payload" >/dev/null
 	fi
 	# clean up
 	rm -f $slug_file
