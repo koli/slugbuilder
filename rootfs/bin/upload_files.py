@@ -48,16 +48,10 @@ def upload_file(url, file_path):
     return is_success(resp)
 
 def is_success(response):
-    if response.status_code in (200, 201, 204):
-        echo_debug('Status Code: {} Response: {}'.format(
-            response.status_code, response.text
-        ))
-        return True
-    else:
-        echo_normal('Status Code: {} Response: {}'.format(
-            response.status_code, response.text
-        ))
-        return False
+    echo_normal('Status Code: {} Response: {}'.format(
+        response.status_code, response.text
+    ))
+    return response.status_code in (200, 201, 204)
 
 if __name__ == '__main__':
     try:
