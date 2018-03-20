@@ -14,4 +14,4 @@ USER slug
 ENV HOME /app
 RUN /builder/install-buildpacks
 
-ENTRYPOINT ["/bin/sh", "-c", "set -eo pipefail; /builder/build.sh | tee /tmp/build.log"]
+ENTRYPOINT ["/bin/bash", "-c", "set -eo pipefail; /builder/build.sh | tee /tmp/build.log"]
