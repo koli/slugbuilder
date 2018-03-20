@@ -55,27 +55,16 @@ def echo_normal(msg):
     set_logging_normal()
     logging.info(msg)
 
-def echo_debug(msg):
-    set_logging_normal()
-    logging.debug(msg)
-
 def echo_title(msg):
     set_logging_title()
     logging.info(msg)
     set_logging_normal()
 
 def is_success(response):
-    if response.status_code in (200, 201, 204):
-        echo_debug('Status Code: {} Response: {}'.format(
-            response.status_code, response.text
-        ))
-        return True
-    else:
-        echo_normal('Status Code: {} Response: {}'.format(
-            response.status_code, response.text
-        ))
-        return False
-
+    echo_normal('Status Code={}, API Response={}'.format(
+        response.status_code,
+        response.text
+    ))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

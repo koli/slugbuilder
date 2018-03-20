@@ -68,7 +68,6 @@ if __name__ == '__main__':
         echo_title('Uploading {} ...'.format(os.path.basename(args.file)))
         if not upload_file(args.git_api_url, args.file):
             sys.exit(1)
-        echo_normal('Done')
     except Exception as e:
         echo_normal('Failed uploading file: {}'.format(e))
         sys.exit(1)
