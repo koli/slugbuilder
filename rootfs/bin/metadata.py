@@ -65,7 +65,8 @@ def is_success(response):
         response.status_code,
         response.text
     ))
-    return response.status_code in (200, 201, 204)
+    # Don't mind if the release already exists (409)
+    return response.status_code in (200, 201, 204, 409)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
