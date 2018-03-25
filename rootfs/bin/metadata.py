@@ -34,9 +34,7 @@ def env_payload():
 def clear_release_payload():
     return {
         'kubeRef': os.environ.get('POD_NAME'),
-        'source': os.environ.get('GIT_SOURCE'),
-        'status': '',
-        'buildDuration': 0
+        'source': os.environ.get('GIT_SOURCE')
     }
 
 def update_release_metadata(url, payload):
