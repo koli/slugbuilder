@@ -31,12 +31,23 @@ def env_payload():
         }
     }
 
+def clear_release(url):
+    payload = {
+        'kubeRef': os.environ.get('POD_NAME'),
+        'source': os.environ.get('GIT_SOURCE'),
+        'status': '',
+        'buildDuration': 0
+    }
+    return requests.put(url, json=payload, headers=headers, auth=basic_auth)
+
 def update_release_metadata(url, payload):
     response = requests.put(url, json=payload, headers=headers, auth=basic_auth)
     return is_success(response)
 
 def create_release(url, payload):
     response = requests.post(url, json=payload, headers=headers, auth=basic_auth)
+    if response.status_code == 409:
+        response = clear_release(url)
     return is_success(response)
 
 def remove_root_handlers():
