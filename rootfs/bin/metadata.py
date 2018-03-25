@@ -31,24 +31,20 @@ def env_payload():
         }
     }
 
-def clear_release(url):
-    payload = {
+def clear_release_payload():
+    return {
         'kubeRef': os.environ.get('POD_NAME'),
         'source': os.environ.get('GIT_SOURCE'),
         'status': '',
         'buildDuration': 0
     }
-    return requests.put(url, json=payload, headers=headers, auth=basic_auth)
 
 def update_release_metadata(url, payload):
     response = requests.put(url, json=payload, headers=headers, auth=basic_auth)
     return is_success(response)
 
 def create_release(url, payload):
-    response = requests.post(url, json=payload, headers=headers, auth=basic_auth)
-    if response.status_code == 409:
-        response = clear_release(url)
-    return is_success(response)
+    return requests.post(url, json=payload, headers=headers, auth=basic_auth)
 
 def remove_root_handlers():
     for handler in logging.root.handlers[:]:
@@ -103,5 +99,14 @@ if __name__ == '__main__':
             sys.exit(1)
     elif args.action == 'create':
         echo_title('Creating new release ...')
-        if not create_release(args.git_api_url, env_payload()):
-            sys.exit(1)
+        resp = create_release(args.git_api_url, env_payload())
+        if resp.status_code == 409:
+            echo_normal('The release already exists, updating ...')
+            payload = clear_release_payload()
+            commit_id = os.environ.get('COMMIT') or ''
+            url = '{}/{}'.format(args.git_api_url, commit_id)
+            if not update_release_metadata(url, payload):
+                sys.exit(1)
+        else:
+            if not is_success(resp):
+                sys.exit(1)
